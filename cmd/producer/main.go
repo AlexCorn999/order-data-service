@@ -2,14 +2,18 @@ package main
 
 import (
 	"log"
-	"strconv"
-	"time"
+	"os"
 
 	"github.com/nats-io/stan.go"
 )
 
 func main() {
-	sc, err := stan.Connect("wb", "123456789")
+	data, err := os.ReadFile("./model.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sc, err := stan.Connect("wb", "1234")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -17,8 +21,6 @@ func main() {
 
 	log.Println("connected")
 
-	for i := 0; ; i++ {
-		sc.Publish("test", []byte("Hello"+strconv.Itoa(i)))
-		time.Sleep(time.Second * 2)
-	}
+	sc.Publish("test", data)
+
 }
