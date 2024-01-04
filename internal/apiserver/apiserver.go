@@ -23,7 +23,7 @@ type APIServer struct {
 	router       *chi.Mux
 	logger       *log.Logger
 	postgres     repository.Storage
-	cacheStorage repository.Storage
+	cacheStorage *inMemory.InMemory
 	nats         *nats.NatsST
 }
 
@@ -53,6 +53,11 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 		return err
 	}
 	defer s.postgres.Close()
+
+	// прогрев кэша
+	if err := s.cacheStorage.RestoreCacheFromDB(); err != nil {
+		return err
+	}
 
 	if err := s.nats.SubscribeCh(); err != nil {
 		return err
@@ -222,7 +227,7 @@ func (s *APIServer) configureStore() error {
 		return err
 	}
 
-	s.cacheStorage = inMemory.NewStorage()
+	s.cacheStorage = inMemory.NewStorage(db)
 	s.postgres = db
 	return nil
 }
