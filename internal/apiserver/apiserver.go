@@ -11,17 +11,19 @@ import (
 	"github.com/AlexCorn999/order-data-service/internal/logger"
 	"github.com/AlexCorn999/order-data-service/internal/nats"
 	"github.com/AlexCorn999/order-data-service/internal/repository"
+	"github.com/AlexCorn999/order-data-service/internal/repository/inMemory"
 	"github.com/AlexCorn999/order-data-service/internal/repository/postgres"
 	"github.com/go-chi/chi"
 	log "github.com/sirupsen/logrus"
 )
 
 type APIServer struct {
-	config  *config.Config
-	router  *chi.Mux
-	logger  *log.Logger
-	storage repository.Storage
-	Nats    *nats.NatsST
+	config       *config.Config
+	router       *chi.Mux
+	logger       *log.Logger
+	postgres     repository.Storage
+	cacheStorage repository.Storage
+	nats         *nats.NatsST
 }
 
 func NewAPIServer(config *config.Config) *APIServer {
@@ -32,6 +34,7 @@ func NewAPIServer(config *config.Config) *APIServer {
 	}
 }
 
+// Start starts the server, configures routing, parses data from the config, configures nats and opens the database connection.
 func (s *APIServer) Start(sigChan chan os.Signal) error {
 	s.config.ParseFlags()
 	s.configureRouter()
@@ -39,7 +42,7 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 	if err := s.configureNats(); err != nil {
 		return err
 	}
-	defer s.Nats.Close()
+	defer s.nats.Close()
 
 	if err := s.configureLogger(); err != nil {
 		return err
@@ -48,25 +51,29 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 	if err := s.configureStore(); err != nil {
 		return err
 	}
-	defer s.storage.Close()
+	defer s.postgres.Close()
 
-	if err := s.Nats.SubscribeCh(); err != nil {
+	if err := s.nats.SubscribeCh(); err != nil {
 		return err
 	}
-	defer s.Nats.UnsubsribeNs()
+	defer s.nats.UnsubsribeNs()
 
 	s.logger.Info("starting api server")
 
+	// добавить восстановление данных из бд в кэш
+
+	// reading data from the channel, validation and writing to the database. Application termination by signal.
 	go func() {
 		for {
 			select {
-			case data := <-s.Nats.Data:
+			case data := <-s.nats.Data:
 
 				var order domain.Order
 				if err := json.Unmarshal(data, &order); err != nil {
 					log.Println("JSON - something wrong")
 					continue
 				}
+				// добавить валидацию и запись в хранилище + кэш
 				fmt.Printf("%+v", order)
 
 			case sig := <-sigChan:
@@ -83,11 +90,13 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 	return nil
 }
 
+// configureRouter configures routing for requests.
 func (s *APIServer) configureRouter() {
 	s.router.Use(logger.WithLogging)
 	//s.router.Get("/order")
 }
 
+// configureLogger configures the logger for operation and specifies the logging level.
 func (s *APIServer) configureLogger() error {
 	level, err := log.ParseLevel(s.config.LogLevel)
 	if err != nil {
@@ -97,20 +106,24 @@ func (s *APIServer) configureLogger() error {
 	return nil
 }
 
+// configureStore configures the database connection.
 func (s *APIServer) configureStore() error {
 	db, err := postgres.NewStorage(s.config.DataBaseURL)
 	if err != nil {
 		return err
 	}
-	s.storage = db
+
+	s.cacheStorage = inMemory.NewStorage()
+	s.postgres = db
 	return nil
 }
 
+// configureNats connects to nats.
 func (s *APIServer) configureNats() error {
 	nats, err := nats.NewNatsST(s.config.ClusterID, s.config.ClientID)
 	if err != nil {
 		return err
 	}
-	s.Nats = nats
+	s.nats = nats
 	return nil
 }

@@ -24,6 +24,7 @@ func NewConfig() *Config {
 	}
 }
 
+// ParseFlags parses flags from the toml file into the Config structure at the specified path.
 func (c *Config) ParseFlags() {
 	flag.Parse()
 

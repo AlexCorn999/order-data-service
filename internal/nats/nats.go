@@ -7,7 +7,7 @@ import (
 )
 
 type NatsST struct {
-	Sc           stan.Conn
+	sc           stan.Conn
 	subscription stan.Subscription
 	subject      string
 	durableName  string
@@ -15,25 +15,27 @@ type NatsST struct {
 }
 
 // NatsConnection устанавливает соединение с кластером в nats streaming.
+// Returns an object with connection data, subject, durable name and initializes the channel to which the data will be sent.
 func NewNatsST(clusterID, clientID string) (*NatsST, error) {
 	sc, err := stan.Connect(clusterID, clientID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to nats: %w", err)
 	}
 
 	return &NatsST{
-		Sc:          sc,
+		sc:          sc,
 		subject:     "orderWB",
 		durableName: "my-durable",
 		Data:        make(chan []byte),
 	}, nil
 }
 
+// Subscribe makes a subscription with the given parameters to a cluster in nats.
 func (n *NatsST) SubscribeCh() error {
 	handler := func(m *stan.Msg) {
 		n.Data <- m.Data
 	}
-	sub, err := n.Sc.Subscribe(n.subject, handler, stan.DurableName(n.durableName))
+	sub, err := n.sc.Subscribe(n.subject, handler, stan.DurableName(n.durableName))
 	if err != nil {
 		return fmt.Errorf("can't subscribe: %w", err)
 	}
@@ -41,12 +43,12 @@ func (n *NatsST) SubscribeCh() error {
 	return nil
 }
 
-// UnsubsribeNs отписка от получения данных.
+// UnsubsribeNs removes interest in subscribing to the subject.
 func (n *NatsST) UnsubsribeNs() error {
 	return n.subscription.Unsubscribe()
 }
 
-// Close закрывает подключение к nats.
+// Close closes the connection to the cluster in nats.
 func (n *NatsST) Close() error {
-	return n.Sc.Close()
+	return n.sc.Close()
 }

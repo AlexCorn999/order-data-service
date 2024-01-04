@@ -1,4 +1,4 @@
-package in_memory
+package inMemory
 
 import (
 	"sync"
@@ -11,14 +11,12 @@ type InMemory struct {
 	DB map[string]*domain.Order
 }
 
-// NewStorage инициализирует хранилище и применяет миграции.
-func NewStorage(addr string) (*InMemory, error) {
+func NewStorage() *InMemory {
 	return &InMemory{
 		DB: make(map[string]*domain.Order),
-	}, nil
+	}
 }
 
-// CloseDB закрывает подключение к базе данных.
 func (s *InMemory) Close() error {
 	return nil
 }

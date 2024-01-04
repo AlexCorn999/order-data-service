@@ -12,16 +12,15 @@ type Postgres struct {
 	DB *sql.DB
 }
 
-// NewStorage инициализирует хранилище и применяет миграции.
 func NewStorage(addr string) (*Postgres, error) {
 	db, err := goose.OpenDBWithDriver("pgx", addr)
 	if err != nil {
-		return nil, fmt.Errorf("goose: failed to open DB: %v", err)
+		return nil, fmt.Errorf("goose: failed to open DB: %w", err)
 	}
 
 	err = goose.Up(db, "./migrations")
 	if err != nil {
-		return nil, fmt.Errorf("goose: failed to migrate: %v", err)
+		return nil, fmt.Errorf("goose: failed to migrate: %w", err)
 	}
 
 	return &Postgres{
@@ -29,7 +28,6 @@ func NewStorage(addr string) (*Postgres, error) {
 	}, nil
 }
 
-// CloseDB закрывает подключение к базе данных.
 func (s *Postgres) Close() error {
 	return s.DB.Close()
 }

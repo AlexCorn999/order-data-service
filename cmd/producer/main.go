@@ -22,6 +22,7 @@ func main() {
 
 	log.Println("connected to nats")
 
+	// добавить отправку множества значений в канал
 	for i := 0; i < 5; i++ {
 		sc.Publish("orderWB", data)
 		time.Sleep(time.Second * 4)
