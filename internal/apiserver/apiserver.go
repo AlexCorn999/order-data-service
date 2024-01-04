@@ -80,7 +80,7 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 				}
 
 				// добавить валидацию и запись в хранилище + кэш
-				fmt.Printf("%+v", order)
+				fmt.Printf("%+v\n", order)
 
 			case sig := <-sigChan:
 				fmt.Println("server stoped by signal", sig)

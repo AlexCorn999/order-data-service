@@ -1,0 +1,75 @@
+{
+  "order_uid": "b563fesdfvgrfrfsf",
+  "track_number": "WBILMTESTTRACK",
+  "entry": "WBIL",
+  "delivery": {
+    "name": "Alex Testov",
+    "phone": "+9720200000",
+    "zip": "2639809",
+    "city": "Moscow",
+    "address": "Ploshad Mira 15",
+    "region": "Moscow oblast",
+    "email": "alex@gmail.com"
+  },
+  "payment": {
+    "transaction": "b563feb7b2b84b6test",
+    "request_id": "",
+    "currency": "",
+    "provider": "wbpay",
+    "amount": 1833,
+    "payment_dt": 163792343,
+    "bank": "sber",
+    "delivery_cost": 100,
+    "goods_total": 317,
+    "custom_fee": 0
+  },
+  "items": [
+    {
+      "chrt_id": 9456557557,
+      "track_number": "WBILMTESTTRACK",
+      "price": 453,
+      "rid": "ab42sfdfafaest",
+      "name": "Alex",
+      "sale": 25,
+      "size": "15",
+      "total_price": 444,
+      "nm_id": 23893545,
+      "brand": "Prada",
+      "status": 4
+    },
+    {
+      "chrt_id": 943546564,
+      "track_number": "WBILMTESTTRACK",
+      "price": 333,
+      "rid": "ab42sfwfrest",
+      "name": "Alex",
+      "sale": 30,
+      "size": "5",
+      "total_price": 1023,
+      "nm_id": 238932435,
+      "brand": "Calvin",
+      "status": 2
+    },
+    {
+      "chrt_id": 9435345345,
+      "track_number": "WBILMTESTTRACK",
+      "price": 44444,
+      "rid": "ab4erg45t",
+      "name": "Alex",
+      "sale": 20,
+      "size": "15",
+      "total_price": 40,
+      "nm_id": 23343434,
+      "brand": "LCWalkiki",
+      "status": 1
+    }
+  ],
+  "locale": "ru",
+  "internal_signature": "",
+  "customer_id": "ffffasf3",
+  "delivery_service": "meest",
+  "shardkey": "10",
+  "sm_id": 100,
+  "date_created": "2021-11-26T06:22:19Z",
+  "oof_shard": "1"
+}

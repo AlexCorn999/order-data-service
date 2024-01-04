@@ -15,11 +15,6 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	data, err := os.ReadFile("./model.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	sc, err := stan.Connect("wb", "1234")
 	if err != nil {
 		log.Fatal(err)
@@ -38,9 +33,20 @@ func main() {
 		}
 	}()
 
-	// добавить отправку множества значений в канал
-	for i := 0; i < 5; i++ {
+	dir, err := os.ReadDir("./testJSON")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range dir {
+
+		data, err := os.ReadFile(fmt.Sprintf("./testJSON/%s", file.Name()))
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		sc.Publish("orderWB", data)
 		time.Sleep(time.Second * 4)
 	}
+
 }
