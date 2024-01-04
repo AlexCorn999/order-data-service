@@ -1,13 +1,16 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
 var (
-	validate *validator.Validate
+	validate           *validator.Validate
+	ErrAlreadyUploaded = errors.New("the order number has already been uploaded")
+	ErrIncorrectOrder  = errors.New("incorrect order id")
 )
 
 type Order struct {
