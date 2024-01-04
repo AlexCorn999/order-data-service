@@ -73,6 +73,12 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 					log.Println("JSON - something wrong")
 					continue
 				}
+
+				if err := order.Validate(); err != nil {
+					log.Println("incorrect data has been received: ", err)
+					continue
+				}
+
 				// добавить валидацию и запись в хранилище + кэш
 				fmt.Printf("%+v", order)
 

@@ -25,7 +25,7 @@
   },
   "items": [
     {
-      "chrt_id": 9934930,
+      "chrt_id": 998394,
       "track_number": "WBILMTESTTRACK",
       "price": 453,
       "rid": "ab4219087a764ae0btest",
@@ -35,7 +35,7 @@
       "total_price": 317,
       "nm_id": 2389212,
       "brand": "Vivienne Sabo",
-      "status": 202
+      "status": 8
     }
   ],
   "locale": "en",

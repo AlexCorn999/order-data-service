@@ -1,20 +1,36 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/go-playground/validator/v10"
+)
+
+var (
+	validate *validator.Validate
+)
 
 type Order struct {
-	OrderID           string       `json:"order_uid"`
-	TrackNumber       string       `json:"track_number"`
-	Entry             string       `json:"entry"`
-	Delivery          DeliveryInfo `json:"delivery"`
-	Payment           PaymentInfo  `json:"payment"`
-	Items             []Item       `json:"items"`
-	Locale            string       `json:"locale"`
+	OrderID           string       `json:"order_uid" validate:"required,gte=10"`
+	TrackNumber       string       `json:"track_number" validate:"required,gte=10"`
+	Entry             string       `json:"entry" validate:"required,gte=4"`
+	Delivery          DeliveryInfo `json:"delivery" validate:"required"`
+	Payment           PaymentInfo  `json:"payment" validate:"required"`
+	Items             []ItemInfo   `json:"items" validate:"required,dive,required"`
+	Locale            string       `json:"locale" validate:"required,gte=2"`
 	InternalSignature string       `json:"internal_signature"`
-	CustomerID        string       `json:"customer_id"`
-	DeliveryService   string       `json:"delivery_service"`
-	Shardkey          string       `json:"shardkey"`
-	SmID              int64        `json:"sm_id"`
-	DateCreated       time.Time    `json:"date_created"`
-	OofShard          string       `json:"oof_shard"`
+	CustomerID        string       `json:"customer_id" validate:"required,gte=2"`
+	DeliveryService   string       `json:"delivery_service" validate:"required,gte=4"`
+	Shardkey          string       `json:"shardkey" validate:"required"`
+	SmID              int64        `json:"sm_id" validate:"required,gte=0"`
+	DateCreated       time.Time    `json:"date_created" validate:"required"`
+	OofShard          string       `json:"oof_shard" validate:"required"`
+}
+
+func init() {
+	validate = validator.New()
+}
+
+func (o *Order) Validate() error {
+	return validate.Struct(o)
 }
