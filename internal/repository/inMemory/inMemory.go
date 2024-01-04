@@ -1,10 +1,13 @@
 package in_memory
 
 import (
+	"sync"
+
 	"github.com/AlexCorn999/order-data-service/internal/domain"
 )
 
 type InMemory struct {
+	mu *sync.Mutex
 	DB map[string]*domain.Order
 }
 

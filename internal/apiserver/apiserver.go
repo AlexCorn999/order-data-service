@@ -1,10 +1,15 @@
 package apiserver
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/AlexCorn999/order-data-service/internal/config"
+	"github.com/AlexCorn999/order-data-service/internal/domain"
 	"github.com/AlexCorn999/order-data-service/internal/logger"
+	"github.com/AlexCorn999/order-data-service/internal/nats"
 	"github.com/AlexCorn999/order-data-service/internal/repository"
 	"github.com/AlexCorn999/order-data-service/internal/repository/postgres"
 	"github.com/go-chi/chi"
@@ -16,6 +21,7 @@ type APIServer struct {
 	router  *chi.Mux
 	logger  *log.Logger
 	storage repository.Storage
+	Nats    *nats.NatsST
 }
 
 func NewAPIServer(config *config.Config) *APIServer {
@@ -26,9 +32,14 @@ func NewAPIServer(config *config.Config) *APIServer {
 	}
 }
 
-func (s *APIServer) Start(ch chan []byte) error {
+func (s *APIServer) Start(sigChan chan os.Signal) error {
 	s.config.ParseFlags()
 	s.configureRouter()
+
+	if err := s.configureNats(); err != nil {
+		return err
+	}
+	defer s.Nats.Close()
 
 	if err := s.configureLogger(); err != nil {
 		return err
@@ -39,9 +50,37 @@ func (s *APIServer) Start(ch chan []byte) error {
 	}
 	defer s.storage.Close()
 
+	if err := s.Nats.SubscribeCh(); err != nil {
+		return err
+	}
+	defer s.Nats.UnsubsribeNs()
+
 	s.logger.Info("starting api server")
 
-	return http.ListenAndServe(s.config.BindAddr, s.router)
+	go func() {
+		for {
+			select {
+			case data := <-s.Nats.Data:
+
+				var order domain.Order
+				if err := json.Unmarshal(data, &order); err != nil {
+					log.Println("JSON - something wrong")
+					continue
+				}
+				fmt.Printf("%+v", order)
+
+			case sig := <-sigChan:
+				fmt.Println("server stoped by signal", sig)
+				os.Exit(1)
+			}
+		}
+	}()
+
+	if err := http.ListenAndServe(s.config.BindAddr, s.router); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *APIServer) configureRouter() {
@@ -64,5 +103,14 @@ func (s *APIServer) configureStore() error {
 		return err
 	}
 	s.storage = db
+	return nil
+}
+
+func (s *APIServer) configureNats() error {
+	nats, err := nats.NewNatsST(s.config.ClusterID, s.config.ClientID)
+	if err != nil {
+		return err
+	}
+	s.Nats = nats
 	return nil
 }

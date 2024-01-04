@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/nats-io/stan.go"
 )
@@ -19,8 +20,10 @@ func main() {
 	}
 	defer sc.Close()
 
-	log.Println("connected")
+	log.Println("connected to nats")
 
-	sc.Publish("test", data)
-
+	for i := 0; i < 5; i++ {
+		sc.Publish("orderWB", data)
+		time.Sleep(time.Second * 4)
+	}
 }

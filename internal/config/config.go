@@ -11,6 +11,8 @@ type Config struct {
 	BindAddr    string `toml:"bind_addr"`
 	LogLevel    string `toml:"log_level"`
 	DataBaseURL string `toml:"database_url"`
+	ClusterID   string `toml:"cluster_id"`
+	ClientID    string `toml:"client_id"`
 }
 
 const configPath = "./configs/apiserver.toml"
