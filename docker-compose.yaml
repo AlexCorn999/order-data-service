@@ -1,0 +1,18 @@
+version: "3.5"
+services:
+  db:
+    container_name: wb
+    image: postgres:13.3
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5432:5432"
+
+
+  nats:
+    image: nats-streaming:latest
+    command: ["-cid", "wb"]
+    ports:
+      - "4222:4222"
+    hostname: nats-server

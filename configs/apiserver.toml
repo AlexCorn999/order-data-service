@@ -1,0 +1,5 @@
+bind_addr = ":8080"
+log_level = "debug"
+database_url = "host=127.0.0.1 port=5432 user=postgres password=1234 sslmode=disable"
+cluster_id = "wb"
+client_id = "1"
