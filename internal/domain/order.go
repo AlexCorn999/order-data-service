@@ -1,13 +1,16 @@
 package domain
 
 import (
+	"errors"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
 var (
-	validate *validator.Validate
+	validate           *validator.Validate
+	ErrAlreadyUploaded = errors.New("the order number has already been uploaded")
+	ErrIncorrectOrder  = errors.New("incorrect order id")
 )
 
 type Order struct {
@@ -25,6 +28,10 @@ type Order struct {
 	SmID              int64        `json:"sm_id" validate:"required,gte=0"`
 	DateCreated       time.Time    `json:"date_created" validate:"required"`
 	OofShard          string       `json:"oof_shard" validate:"required"`
+}
+
+type Page struct {
+	OrderID string
 }
 
 func init() {

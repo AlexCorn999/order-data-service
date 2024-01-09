@@ -1,0 +1,34 @@
+{
+  "order_uid": "b563fesdfvgrfrfsf",
+  "track_number": "WBILMTESTTRACK",
+  "entry": "WBIL",
+  "delivery": {
+    "name": "Alex Testov",
+    "phone": "+9720200000",
+    "zip": "2639809",
+    "city": "Moscow",
+    "address": "Ploshad Mira 15",
+    "region": "Moscow oblast",
+    "email": "alex@gmail.com"
+  },
+  "payment": {
+    "transaction": "b563feb7b2b84b6test",
+    "request_id": "",
+    "currency": "",
+    "provider": "wbpay",
+    "amount": 1833,
+    "payment_dt": 163792343,
+    "bank": "sber",
+    "delivery_cost": 100,
+    "goods_total": 317,
+    "custom_fee": 0
+  },
+  "locale": "ru",
+  "internal_signature": "",
+  "customer_id": "ffffasf3",
+  "delivery_service": "meest",
+  "shardkey": "10",
+  "sm_id": 100,
+  "date_created": "2021-11-26T06:22:19Z",
+  "oof_shard": "1"
+}

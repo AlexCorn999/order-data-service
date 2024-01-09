@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,7 +23,7 @@ type APIServer struct {
 	router       *chi.Mux
 	logger       *log.Logger
 	postgres     repository.Storage
-	cacheStorage repository.Storage
+	cacheStorage *inMemory.InMemory
 	nats         *nats.NatsST
 }
 
@@ -53,14 +54,18 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 	}
 	defer s.postgres.Close()
 
+	if err := s.cacheStorage.RestoreCacheFromDB(); err != nil {
+		return err
+	}
+
+	s.logger.Info("the cache has been restored")
+
 	if err := s.nats.SubscribeCh(); err != nil {
 		return err
 	}
 	defer s.nats.UnsubsribeNs()
 
 	s.logger.Info("starting api server")
-
-	// добавить восстановление данных из бд в кэш
 
 	// reading data from the channel, validation and writing to the database. Application termination by signal.
 	go func() {
@@ -74,13 +79,31 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 					continue
 				}
 
+				// валидация значений. Если некорректные данные, то пропускаем и не записываем.
 				if err := order.Validate(); err != nil {
 					log.Println("incorrect data has been received: ", err)
 					continue
 				}
 
-				// добавить валидацию и запись в хранилище + кэш
-				fmt.Printf("%+v", order)
+				log.Info("entering the order into the database")
+
+				//добавление значений в БД.
+				if err := s.postgres.AddOrder(&order); err != nil {
+					if errors.Is(err, domain.ErrAlreadyUploaded) {
+						log.Println(err)
+					} else {
+						log.Error(err)
+					}
+				}
+
+				// добавление значений в кэш
+				if err := s.cacheStorage.AddOrder(&order); err != nil {
+					if errors.Is(err, domain.ErrAlreadyUploaded) {
+						log.Println(err)
+					} else {
+						log.Error(err)
+					}
+				}
 
 			case sig := <-sigChan:
 				fmt.Println("server stoped by signal", sig)
@@ -99,7 +122,7 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 // configureRouter configures routing for requests.
 func (s *APIServer) configureRouter() {
 	s.router.Use(logger.WithLogging)
-	//s.router.Get("/order")
+	s.router.HandleFunc("/", s.checkOrder)
 }
 
 // configureLogger configures the logger for operation and specifies the logging level.
@@ -119,7 +142,7 @@ func (s *APIServer) configureStore() error {
 		return err
 	}
 
-	s.cacheStorage = inMemory.NewStorage()
+	s.cacheStorage = inMemory.NewStorage(db)
 	s.postgres = db
 	return nil
 }
