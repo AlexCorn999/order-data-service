@@ -30,6 +30,10 @@ type Order struct {
 	OofShard          string       `json:"oof_shard" validate:"required"`
 }
 
+type Page struct {
+	OrderID string
+}
+
 func init() {
 	validate = validator.New()
 }

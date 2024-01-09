@@ -2,6 +2,7 @@ package inMemory
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -59,10 +60,16 @@ func (s *InMemory) RestoreCacheFromDB() error {
 	defer rows.Close()
 
 	for rows.Next() {
+		var data []byte
 		var order domain.Order
-		if err := rows.Scan(&order); err != nil {
+		if err := rows.Scan(&data); err != nil {
 			return err
 		}
+
+		if err := json.Unmarshal(data, &order); err != nil {
+			return err
+		}
+
 		s.AddOrder(&order)
 	}
 

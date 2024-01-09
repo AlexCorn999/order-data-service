@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Данные о заказе</title>
+    <style>
+        body {
+            background-color: #7d0ae9;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 30px;
+        }
+
+        h2 {
+            color: #140123;
+            font-size: 20px;
+        }
+        
+        .details-section {
+            margin-top: 20px;
+        }
+        
+        .field-name {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .field-value {
+            color: #777;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div style="text-align: center;">
+            <h1>Данные о заказе</h1>
+        </div>
+    
+        
+    <h2>Order ID: <span class="value">{{.OrderID}}</span></h2>
+    <h2>Track Number: <span class="value">{{.TrackNumber}}</span></h2>
+    <h2>Entry: <span class="value">{{.Entry}}</span></h2>
+    <h2>Delivery:</h2>
+    <ul class="nested">
+      <li><span class="key">Name:</span> <span class="value">{{.Delivery.Name}}</span></li>
+      <li><span class="key">Phone:</span> <span class="value">{{.Delivery.Phone}}</span></li>
+      <li><span class="key">Zip:</span> <span class="value">{{.Delivery.Zip}}</span></li>
+      <li><span class="key">City:</span> <span class="value">{{.Delivery.City}}</span></li>
+      <li><span class="key">Address:</span> <span class="value">{{.Delivery.Address}}</span></li>
+      <li><span class="key">Region:</span> <span class="value">{{.Delivery.Region}}</span></li>
+      <li><span class="key">Email:</span> <span class="value">{{.Delivery.Email}}</span></li>
+    </ul>
+    <h2>Payment:</h2>
+    <ul class="nested">
+      <li><span class="key">Transaction:</span> <span class="value">{{.Payment.Transaction}}</span></li>
+      <li><span class="key">RequestID:</span> <span class="value">{{.Payment.RequestID}}</span></li>
+      <li><span class="key">Currency:</span> <span class="value">{{.Payment.Currency}}</span></li>
+      <li><span class="key">Provider:</span> <span class="value">{{.Payment.Provider}}</span></li>
+      <li><span class="key">Amount:</span> <span class="value">{{.Payment.Amount}}</span></li>
+      <li><span class="key">PaymentDT:</span> <span class="value">{{.Payment.PaymentDT}}</span></li>
+      <li><span class="key">Bank:</span> <span class="value">{{.Payment.Bank}}</span></li>
+      <li><span class="key">DeliveryCost:</span> <span class="value">{{.Payment.DeliveryCost}}</span></li>
+      <li><span class="key">GoodsTotal:</span> <span class="value">{{.Payment.GoodsTotal}}</span></li>
+      <li><span class="key">CustomFee:</span> <span class="value">{{.Payment.CustomFee}}</span></li>
+    </ul>
+    <h2>Items:</h2>
+    <ul>
+      {{range .Items}}
+      <li>
+        <ul class="nested">
+          <li><span class="key">ChrtID:</span> <span class="value">{{.ChrtID}}</span></li>
+          <li><span class="key">TrackNumber:</span> <span class="value">{{.TrackNumber}}</span></li>
+          <li><span class="key">Price:</span> <span class="value">{{.Price}}</span></li>
+          <li><span class="key">Rid:</span> <span class="value">{{.Rid}}</span></li>
+          <li><span class="key">Name:</span> <span class="value">{{.Name}}</span></li>
+          <li><span class="key">Sale:</span> <span class="value">{{.Sale}}</span></li>
+          <li><span class="key">Size:</span> <span class="value">{{.Size}}</span></li>
+          <li><span class="key">TotalPrice:</span> <span class="value">{{.TotalPrice}}</span></li>
+          <li><span class="key">NmID:</span> <span class="value">{{.NmID}}</span></li>
+          <li><span class="key">Brand:</span> <span class="value">{{.Brand}}</span></li>
+          <li><span class="key">Status:</span> <span class="value">{{.Status}}</span></li>
+        </ul>
+      </li>
+      {{end}}
+    </ul>
+    <h2>Locale: <span class="value">{{.Locale}}</span></h2>
+    <h2>Internal Signature: <span class="value">{{.InternalSignature}}</span></h2>
+    <h2>Customer ID: <span class="value">{{.CustomerID}}</span></h2>
+    <h2>Delivery Service: <span class="value">{{.DeliveryService}}</span></h2>
+    <h2>Shardkey: <span class="value">{{.Shardkey}}</span></h2>
+    <h2>SmID: <span class="value">{{.SmID}}</span></h2>
+  
+</body>
+</html>

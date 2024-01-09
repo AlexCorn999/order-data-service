@@ -54,10 +54,11 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 	}
 	defer s.postgres.Close()
 
-	// прогрев кэша
 	if err := s.cacheStorage.RestoreCacheFromDB(); err != nil {
 		return err
 	}
+
+	s.logger.Info("the cache has been restored")
 
 	if err := s.nats.SubscribeCh(); err != nil {
 		return err
@@ -65,12 +66,6 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 	defer s.nats.UnsubsribeNs()
 
 	s.logger.Info("starting api server")
-
-	// добавить восстановление данных из бд в кэш
-	//
-	// основная задача
-	//
-	//
 
 	// reading data from the channel, validation and writing to the database. Application termination by signal.
 	go func() {
@@ -92,14 +87,14 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 
 				log.Info("entering the order into the database")
 
-				// добавление значений в БД.
-				// if err := s.postgres.AddOrder(&order); err != nil {
-				// 	if errors.Is(err, domain.ErrAlreadyUploaded) {
-				// 		log.Println(err)
-				// 	} else {
-				// 		log.Error(err)
-				// 	}
-				// }
+				//добавление значений в БД.
+				if err := s.postgres.AddOrder(&order); err != nil {
+					if errors.Is(err, domain.ErrAlreadyUploaded) {
+						log.Println(err)
+					} else {
+						log.Error(err)
+					}
+				}
 
 				// добавление значений в кэш
 				if err := s.cacheStorage.AddOrder(&order); err != nil {
@@ -109,86 +104,6 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 						log.Error(err)
 					}
 				}
-
-				res, err := s.cacheStorage.GetOrderByID("b563feb7b2b84b6test")
-				if err != nil {
-					if errors.Is(err, domain.ErrIncorrectOrder) {
-						log.Println(err)
-					} else {
-						log.Error(err)
-					}
-				}
-
-				res1, err := s.cacheStorage.GetOrderByID("b563feb7b2bw4b6test")
-				if err != nil {
-					if errors.Is(err, domain.ErrIncorrectOrder) {
-						log.Println(err)
-					} else {
-						log.Error(err)
-					}
-				}
-
-				res2, err := s.cacheStorage.GetOrderByID("b563fesdfvgrfrfsf")
-				if err != nil {
-					if errors.Is(err, domain.ErrIncorrectOrder) {
-						log.Println(err)
-					} else {
-						log.Error(err)
-					}
-				}
-
-				res3, err := s.cacheStorage.GetOrderByID("b563fesdf4556test")
-				if err != nil {
-					if errors.Is(err, domain.ErrIncorrectOrder) {
-						log.Println(err)
-					} else {
-						log.Error(err)
-					}
-				}
-
-				fmt.Println(res)
-				fmt.Println(res1)
-				fmt.Println(res2)
-				fmt.Println(res3)
-
-				// res, err := s.postgres.GetOrderByID("b563feb7b2b84b6test")
-				// if err != nil {
-				// 	if errors.Is(err, sql.ErrNoRows) {
-				// 		log.Println(domain.ErrIncorrectOrder)
-				// 	} else {
-				// 		log.Error(err)
-				// 	}
-				// }
-
-				// res1, err := s.postgres.GetOrderByID("b563feb7b2bw4b6test")
-				// if err != nil {
-				// 	if errors.Is(err, sql.ErrNoRows) {
-				// 		log.Println(domain.ErrIncorrectOrder)
-				// 	} else {
-				// 		log.Error(err)
-				// 	}
-				// }
-
-				// res2, err := s.postgres.GetOrderByID("b563fesdfvgrfrfsf")
-				// if err != nil {
-				// 	if errors.Is(err, sql.ErrNoRows) {
-				// 		log.Println(domain.ErrIncorrectOrder)
-				// 	} else {
-				// 		log.Error(err)
-				// 	}
-				// }
-				// res3, err := s.postgres.GetOrderByID("b563fesdf4556test")
-				// if err != nil {
-				// 	if errors.Is(err, sql.ErrNoRows) {
-				// 		log.Println(domain.ErrIncorrectOrder)
-				// 	} else {
-				// 		log.Error(err)
-				// 	}
-				// }
-				// fmt.Println(res)
-				// fmt.Println(res1)
-				// fmt.Println(res2)
-				// fmt.Println(res3)
 
 			case sig := <-sigChan:
 				fmt.Println("server stoped by signal", sig)
@@ -207,7 +122,7 @@ func (s *APIServer) Start(sigChan chan os.Signal) error {
 // configureRouter configures routing for requests.
 func (s *APIServer) configureRouter() {
 	s.router.Use(logger.WithLogging)
-	//s.router.Get("/order")
+	s.router.HandleFunc("/", s.checkOrder)
 }
 
 // configureLogger configures the logger for operation and specifies the logging level.

@@ -53,18 +53,18 @@ func (p *Postgres) AddOrder(order *domain.Order) error {
 	return nil
 }
 
-func (p *Postgres) GetOrderByID(id string) (*domain.Order, error) {
-	var order domain.Order
-	var data []byte
-	if err := p.DB.QueryRow("SELECT order_info from orders WHERE order_uid=$1", id).Scan(&data); err != nil {
-		return nil, fmt.Errorf("postgres: failed to retrieve the value from the database: %w", err)
-	}
+// func (p *Postgres) GetOrderByID(id string) (*domain.Order, error) {
+// 	var order domain.Order
+// 	var data []byte
+// 	if err := p.DB.QueryRow("SELECT order_info from orders WHERE order_uid=$1", id).Scan(&data); err != nil {
+// 		return nil, fmt.Errorf("postgres: failed to retrieve the value from the database: %w", err)
+// 	}
 
-	if err := json.Unmarshal(data, &order); err != nil {
-		return nil, fmt.Errorf("postgres: can't unmarshal data to json object: %w", err)
-	}
-	return &order, nil
-}
+// 	if err := json.Unmarshal(data, &order); err != nil {
+// 		return nil, fmt.Errorf("postgres: can't unmarshal data to json object: %w", err)
+// 	}
+// 	return &order, nil
+// }
 
 func (s *Postgres) Close() error {
 	return s.DB.Close()
