@@ -8,7 +8,7 @@ import (
 	"github.com/AlexCorn999/order-data-service/internal/domain"
 )
 
-// Обработчик для обработки orderID после отправки формы
+// checkOrder ...
 func (s *APIServer) checkOrder(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		http.ServeFile(w, r, "./web/order_page.html")
@@ -50,9 +50,6 @@ func (s *APIServer) checkOrder(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		// // вывод данных
-		// fmt.Fprintf(w, "Order ID: %v", res)
 	}
 
 }
